@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export const MapComponent = () => {
+type Props = {
+  showMarker: boolean;
+};
+
+export const MapComponent = ({ showMarker }: Props) => {
   const mapContainer = useRef(null);
   const [map, setMap] = useState<Map | null>(null);
 
@@ -26,22 +30,31 @@ export const MapComponent = () => {
 
     setMap(mapInstance);
 
-    return () => mapInstance.remove();
+    return () => {
+      mapInstance.remove();
+    };
   }, []);
 
   useEffect(
     function updateMap() {
       if (!map) return;
+      const marker = new maplibregl.Marker().setLngLat([139.767144, 35.680621]);
 
-      new maplibregl.Marker().setLngLat([139.767144, 35.680621]).addTo(map);
+      if (showMarker) {
+        marker.addTo(map);
+      }
+
+      return () => {
+        marker.remove();
+      };
     },
-    [map]
+    [map, showMarker]
   );
 
   return (
     <div
       ref={mapContainer}
-      style={{ position: "fixed", top: 0, bottom: 0, width: "100%" }}
+      style={{ position: "absolute", top: 0, bottom: 0, width: "100%" }}
     />
   );
 };
